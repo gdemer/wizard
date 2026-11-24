@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wizards Hub</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      .selector-container {
+        margin-bottom: 25px;
+        text-align: center;
+      }
+      label {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-right: 10px;
+        font-size: 16px;
+      }
+      select {
+        padding: 10px 15px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: 2px solid #3498db;
+        background-color: white;
+        color: #2c3e50;
+        cursor: pointer;
+        outline: none;
+      }
+      .wizard-container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        width: 550px;
+        max-width: 90%;
+        text-align: center;
+        position: relative;
+      }
+      .wizard-step {
+        display: none;
+        min-height: 250px;
+        text-align: left;
+      }
+      .wizard-step.active {
+        display: block;
+        animation: fadeIn 0.4s ease-in-out;
+      }
+      .step-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+      }
+      h2 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 20px;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+      .action-btn {
+        background: #f8f9fa;
+        border: 1px solid #dcdde1;
+        border-radius: 6px;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      .action-btn:hover {
+        background: #e1b12c;
+        border-color: #e1b12c;
+      }
+      .step-content {
+        color: #555;
+        line-height: 1.6;
+      }
+      .step-content p {
+        margin-bottom: 12px;
+      }
+      .step-content ul,
+      .step-content ol {
+        padding-left: 20px;
+        margin-bottom: 12px;
+      }
+      .buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+      }
+      .nav-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .nav-btn:disabled {
+        background-color: #bdc3c7;
+        cursor: not-allowed;
+      }
+      .nav-btn:hover:not(:disabled) {
+        background-color: #2980b9;
+      }
+      .indicators {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .dot {
+        height: 12px;
+        width: 12px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .dot.active {
+        background-color: #3498db;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @media print {
+        body {
+          background: white;
+          min-height: auto;
+          display: block;
+        }
+        .selector-container,
+        .action-buttons,
+        .buttons,
+        .indicators {
+          display: none !important;
+        }
+        .wizard-container {
+          box-shadow: none;
+          padding: 0;
+          width: 100%;
+          max-width: 100%;
+        }
+        .wizard-step.active {
+          display: block;
+        }
+        h2 {
+          border: none;
+        }
+      }
+      /* Στυλ για το εξωτερικό πλαίσιο του κώδικα */
+      pre {
+        background-color: #282c34; /* Σκούρο γκρι/μπλε background (τύπου One Dark θέμα) */
+        border-left: 4px solid #61dafb; /* Μια κομψή γαλάζια γραμμή αριστερά (το χρώμα της React) */
+        border-radius: 6px; /* Στρογγυλεμένες γωνίες */
+        padding: 14px; /* Εσωτερικό κενό για να αναπνέει ο κώδικας */
+        overflow-x: auto; /* Αν ο κώδικας είναι μεγάλος, βγάζει οριζόντιο scrollbar αντί να χαλάει τη σελίδα */
+        margin: 15px 0; /* Κενό πάνω και κάτω από το πλαίσιο */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Απαλή σκιά για εφέ βάθους */
+      }
+
+      /* Στυλ για το κείμενο του κώδικα */
+      pre code {
+        font-family:
+          "Fira Code", "Courier New", Courier, monospace; /* Γραμματοσειρά προγραμματισμού */
+        font-size: 14px; /* Ιδανικό μέγεθος για ανάγνωση */
+        color: #abb2bf; /* Ανοιχτό γκρι χρώμα για το κείμενο */
+        line-height: 1.5; /* Απόσταση μεταξύ των γραμμών */
+        display: block; /* Αναγκάζει τον κώδικα να απλωθεί σωστά */
+      }
+
+      /* Συμπληρωματικό στυλ για inline κώδικα (όταν είναι μέσα στην πρόταση, π.χ. `src/main.jsx`) */
+      p code {
+        background-color: #f0f0f0; /* Ανοιχτό γκρι background για να ξεχωρίζει */
+        color: #d63384; /* Ένα όμορφο ροζ/κόκκινο χρώμα για τις λέξεις-κλειδιά */
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 14px;
+      }
+      /* Κάνει τα γράμματα του κώδικα πιο φωτεινά και ευανάγνωστα */
+      pre[class*="language-"] code,
+      pre code {
+        color: #f8f8f2 !important; /* Σχεδόν λευκό/ανοιχτό γκρι για μέγιστη αντίθεση */
+        font-weight: 500; /* Ελαφρώς πιο έντονα γράμματα */
+        text-shadow: none !important; /* Αφαίρεση τυχόν σκιών που θολώνουν το κείμενο */
+      }
+      /* Κάνει τα ονόματα μεταβλητών και components να φαίνονται πιο φωτεινά */
+      .token.variable,
+      .token.imports,
+      .language-javascript .token.maybe-class-name {
+        color: #e06c75 !important; /* Ένα όμορφο απαλό κόκκινο/ροζ ή αλλάξτε το σε #ffffff για καθαρό λευκό */
+      }
+      /* Δίνει έντονο πράσινο/γαλάζιο χρώμα στα React Tags και τα βέλη τους */
+      .token.tag,
+      .token.punctuation {
+        color: #61dafb !important; /* Το χαρακτηριστικό γαλάζιο της React */
+      }
+      .token.class-name {
+        color: #e5c07b !important; /* Όμορφο κίτρινο για τα ονόματα των Components */
+      }
+    </style>
+    <link rel="stylesheet" href="https://cloudflare.com" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  </head>
+  <body>
+    <div class="selector-container">
+      <label for="wizardSelect">Επιλέξτε Οδηγό:</label>
+      <select id="wizardSelect" onchange="loadWizard(this.value)">
+        <!-- Οι επιλογές θα μπουν αυτόματα από τη JS -->
+      </select>
+    </div>
+
+    <div class="wizard-container">
+      <div id="stepsRenderLocation"></div>
+      <div class="indicators" id="indicatorsLocation"></div>
+      <div class="buttons">
+        <button id="prevBtn" class="nav-btn" onclick="changeStep(-1)" disabled>
+          Προηγούμενο
+        </button>
+        <button id="nextBtn" class="nav-btn" onclick="changeStep(1)">
+          Επόμενο
+        </button>
+      </div>
+    </div>
+
+    <!-- Φόρτωση των δεδομένων που παράγει η Python -->
+    <script src="Ddata.js"></script>
+    <script src="https://cloudflare.com"></script>
+    <!-- Autoloader: Φορτώνει αυτόματα τη γλώσσα JSX/React όταν τη χρειαστεί -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cloudflare.com"></script>
+
+    <script>
+      let currentStep = 0;
+      let totalSteps = 0;
+      let activeWizardId = "";
+
+      function initializeSelector() {
+        const selectMenu = document.getElementById("wizardSelect");
+        selectMenu.innerHTML = "";
+
+        // Δημιουργία των options στο DropDown
+        for (const [id, wizard] of Object.entries(allWizards)) {
+          const opt = document.createElement("option");
+          opt.value = id;
+          opt.innerText = wizard.name;
+          selectMenu.appendChild(opt);
+        }
+
+        if (selectMenu.value) {
+          loadWizard(selectMenu.value);
+        }
+      }
+
+      function loadWizard(wizardId) {
+        activeWizardId = wizardId;
+        const wizard = allWizards[wizardId];
+        totalSteps = wizard.steps.length;
+        currentStep = 0;
+
+        let stepsHtml = "";
+        let indicatorsHtml = "";
+
+        wizard.steps.forEach((sec, i) => {
+          const activeClass = i === 0 ? "active" : "";
+          stepsHtml += `
+            <div class="wizard-step ${activeClass}" id="step-${i}">
+                <div class="step-header">
+                    <h2>Βήμα ${i + 1}: ${sec.title}</h2>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="copyStepText(${i})" title="Αντιγραφή">📋</button>
+                        <button class="action-btn" onclick="printStep()" title="Εκτύπωση">🖨️</button>
+                    </div>
+                </div>
+                <div class="step-content" id="content-${i}">${sec.content}</div>
+            </div>`;
+          indicatorsHtml += `<div class="dot ${activeClass}" onclick="goToStep(${i})"></div>`;
+        });
+
+        document.getElementById("stepsRenderLocation").innerHTML = stepsHtml;
+        document.getElementById("indicatorsLocation").innerHTML =
+          indicatorsHtml;
+
+        updateNavigation();
+        // Αναγκάζει το Prism να ξανακοιτάξει τη σελίδα και να χρωματίσει τον νέο κώδικα
+        if (typeof Prism !== "undefined") {
+          Prism.highlightAll();
+        }
+      }
+
+      function updateNavigation() {
+        document.querySelectorAll(".wizard-step").forEach((step, idx) => {
+          step.classList.toggle("active", idx === currentStep);
+        });
+        document.querySelectorAll(".dot").forEach((dot, idx) => {
+          dot.classList.toggle("active", idx === currentStep);
+        });
+        document.getElementById("prevBtn").disabled = currentStep === 0;
+        const nextBtn = document.getElementById("nextBtn");
+        nextBtn.innerText =
+          currentStep === totalSteps - 1 ? "Τέλος" : "Επόμενο";
+        nextBtn.style.backgroundColor =
+          currentStep === totalSteps - 1 ? "#2ecc71" : "#3498db";
+
+        // 🔥 ΟΡΙΣΤΙΚΗ ΔΙΟΡΘΩΣΗ: Εκτέλεση του Prism αμέσως μετά το render του βήματος
+        setTimeout(() => {
+          if (typeof Prism !== "undefined") {
+            Prism.highlightAll();
+          }
+        }, 0);
+      }
+
+      function changeStep(dir) {
+        currentStep += dir;
+        if (currentStep >= totalSteps) {
+          alert("Ο οδηγός ολοκληρώθηκε!");
+          currentStep = totalSteps - 1;
+          return;
+        }
+        updateNavigation();
+      }
+
+      function goToStep(idx) {
+        currentStep = idx;
+        updateNavigation();
+      }
+
+      function copyStepText(idx) {
+        const text = document.getElementById(`content-${idx}`).innerText;
+        navigator.clipboard.writeText(text).then(() => alert("Αντιγράφηκε!"));
+      }
+
+      function printStep() {
+        window.print();
+      }
+
+      // Εκκίνηση μόλις φορτώσει η σελίδα
+      if (typeof allWizards !== "undefined") {
+        initializeSelector();
+      } else {
+        document.getElementById("stepsRenderLocation").innerHTML =
+          "<h2>Δεν βρέθηκαν δεδομένα. Τρέξτε πρώτα την Python!</h2>";
+      }
+    </script>
+  </body>
+</html>
